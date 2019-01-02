@@ -14,10 +14,12 @@ size = `tput cols`.to_i
 
 xdg_config_home = ENV["XDG_CONFIG_HOME"] || File.join(ENV["HOME"], ".config")
 
+script_dir = File.expand_path("../..", __FILE__)
+
 paths = [
   File.join(xdg_config_home, "powerline-pills"),
   File.join(xdg_config_home, "powerline_pills"),
-  ENV['POWERLINE_PILLS'],
+  script_dir,
 ]
 
 path =

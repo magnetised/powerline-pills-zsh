@@ -1,1 +1,1 @@
-PROMPT='$(ruby $POWERLINE_PILLS/lib/powerline_pills.rb $?)'
+PROMPT="\$(ruby $(cd ${0:a:h}/..; pwd)/lib/powerline_pills.rb \$?)"
