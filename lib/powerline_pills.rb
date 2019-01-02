@@ -11,9 +11,21 @@ last_exit = ARGV[0] == '0'
 username = ENV['USER']
 dir = Dir.pwd
 size = `tput cols`.to_i
-path = ENV['POWERLINE_PILLS']
 
-config = YAML.load_file(path + '/config.yml')
+xdg_config_home = ENV["XDG_CONFIG_HOME"] || File.join(ENV["HOME"], ".config")
+
+paths = [
+  File.join(xdg_config_home, "powerline-pills"),
+  File.join(xdg_config_home, "powerline_pills"),
+  ENV['POWERLINE_PILLS'],
+]
+
+path =
+  paths
+    .map { |dir| File.join(dir, "config.yml") }
+    .find { |path|  File.exist?(path) }
+
+config = YAML.load_file(path)
 
 date_format = config['date']['format']
 cur_date = `date +#{date_format}`.to_s.chomp
