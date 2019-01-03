@@ -1,9 +1,8 @@
 class Segment
-  attr_reader :background, :foreground, :text
+  attr_reader :background
 
   def initialize(background, text)
     @background = background
-    @foreground = background.tr('K', 'F')
     @text = text
   end
 
@@ -15,9 +14,13 @@ class Segment
       else
         # if prev is a segment then we output a right with foreground of the
         # prev.background and background our foreground
-        prev.foreground + background + right
+        prev.foreground + @background + right
       end
-    out + background + text
+    out + @background + @text
+  end
+
+  def foreground
+    @background.tr('K', 'F')
   end
 
   def blank?

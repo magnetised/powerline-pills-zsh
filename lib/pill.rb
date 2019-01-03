@@ -39,7 +39,11 @@ class GitPill
   def background_color
     color =
       if git_modified?
-        @config['background_color_dirty']
+        if git_all_staged?
+          @config['background_color_staged']
+        else
+          @config['background_color_dirty']
+        end
       else
         @config['background_color_clean']
       end
@@ -71,8 +75,16 @@ class GitPill
     !`git status --porcelain -uno`.empty?
   end
 
+  def git_dirty?
+    git_modified? && !git_all_staged?
+  end
+
+  def git_all_staged?
+    system('git diff --no-ext-diff --quiet --exit-code 2>/dev/null')
+  end
+
   def git_dirty_text
-    if git_modified?
+    if git_dirty?
       fg_color(@config['icon']['dirty']['color']) << @config['icon']['dirty']['char']
     else
       nil
@@ -81,7 +93,7 @@ class GitPill
 
   def git_untracked_text
     untracked = `git ls-files --other --exclude-standard --directory --no-empty-directory 2>/dev/null`.chomp
-    if untracked == ''
+    if untracked.empty?
       nil
     else
       fg_color(@config['icon']['untracked']['color']) << @config['icon']['untracked']['char']

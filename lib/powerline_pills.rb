@@ -44,8 +44,6 @@ icon_darwin = config['os']['icon_darwin']
 icon_os = linux? ? icon_linux : icon_darwin
 icon_user = config['user']['icon']['char']
 icon_folder = config['folder']['icon']['char']
-icon_branch = config['git']['icon']['char']
-icon_dirty = config['git']['icon']['char_dirty']
 icon_date = config['date']['icon']['char']
 icon_bash = config['cmd']['icon']['char']
 
