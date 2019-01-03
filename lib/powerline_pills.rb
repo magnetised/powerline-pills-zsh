@@ -4,6 +4,7 @@
 require 'yaml'
 require_relative 'util'
 require_relative 'pill'
+require_relative 'segment'
 include Util
 
 # VARS
@@ -48,15 +49,6 @@ icon_dirty = config['git']['icon']['char_dirty']
 icon_date = config['date']['icon']['char']
 icon_bash = config['cmd']['icon']['char']
 
-# COLORS
-def fg_color(color)
-  "%F{#{color}}"
-end
-
-def bg_color(color)
-  "%K{#{color}}"
-end
-
 background_os = bg_color(config['os']['background_color'])
 foreground_os = fg_color(config['os']['color'])
 
@@ -67,11 +59,6 @@ foreground_user = fg_color(config['user']['color'])
 background_folder = bg_color(config['folder']['background_color'])
 foreground_icon_folder = fg_color(config['folder']['icon']['color'])
 foreground_folder = fg_color(config['folder']['color'])
-
-background_git = bg_color(config['git']['background_color'])
-foreground_icon_git = fg_color(config['git']['icon']['color'])
-foreground_icon_dirty_git = fg_color(config['git']['icon']['color_dirty'])
-foreground_git = fg_color(config['git']['color'])
 
 background_date = bg_color(config['date']['background_color'])
 foreground_icon_date = fg_color(config['date']['icon']['color'])
@@ -94,13 +81,7 @@ user_pill = Pill.new(background_user, foreground_icon_user, icon_user,
 folder_pill = Pill.new(background_folder, foreground_icon_folder, icon_folder,
                        foreground_folder, dir)
 
-git_text = nil
-if git_dir?
-  git_text = foreground_git + git_branch_name
-  git_text += ' ' + foreground_icon_dirty_git + icon_dirty if git_modified?
-end
-git_pill = Pill.new(background_git, foreground_icon_git, icon_branch,
-                    foreground_git, git_text)
+git_pill = GitPill.new(config['git_new'])
 
 date_pill = Pill.new(background_date, foreground_icon_date, icon_date,
                      foreground_date, cur_date)
@@ -128,36 +109,21 @@ config_left_bottom.each do |clb|
   left_bottom.push(pill_names[clb.to_sym]) unless pill_names[clb.to_sym].nil?
 end
 
-# LEFT (TOP)
-left_top.delete(git_pill) if git_text.nil?
-str_left_top = ''
-left_top[0...-1].each_with_index do |l, i|
-  str_left_top += l.join(powerline_icon_left, powerline_icon_right,
-                         left_top[i + 1], i.zero?)
+def render_segments(pills, icon_left, icon_right)
+  segments = pills.map(&:segment)
+  ([BlankSegment.new] + segments).zip(segments + [BlankSegment.new]).map do |prev, current|
+    current.join(prev, icon_left, icon_right)
+  end.join('')
 end
-str_left_top += left_top[-1].join(powerline_icon_left, powerline_icon_right,
-                                  nil, left_top.size == 1)
+
+# LEFT (TOP)
+str_left_top = render_segments(left_top, powerline_icon_left, powerline_icon_right)
 
 # RIGHT (TOP)
-right_top.delete(git_pill) if git_text.nil?
-str_right_top = ''
-right_top[0...-1].each_with_index do |r, i|
-  str_right_top += r.join(powerline_icon_left, powerline_icon_right,
-                          right_top[i + 1], i.zero?)
-end
-str_right_top += right_top[-1].join(powerline_icon_left, powerline_icon_right,
-                                    nil, right_top.size == 1)
+str_right_top = render_segments(right_top, powerline_icon_left, powerline_icon_right)
 
 # LEFT (BOTTOM)
-left_bottom.delete(git_pill) if git_text.nil?
-str_left_bottom = ''
-left_bottom[0...-1].each_with_index do |l, i|
-  str_left_bottom += l.join(powerline_icon_left, powerline_icon_right,
-                            left_bottom[i + 1], i.zero?)
-end
-str_left_bottom += left_bottom[-1].join(powerline_icon_left,
-                                        powerline_icon_right, nil,
-                                        left_bottom.size == 1)
+str_left_bottom = render_segments(left_bottom, powerline_icon_left, powerline_icon_right)
 
 spaces = size - (clean_str(str_left_top).size + clean_str(str_right_top).size)
 spaces = 0 if spaces < 0
