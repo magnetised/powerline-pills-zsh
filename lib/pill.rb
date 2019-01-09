@@ -25,7 +25,7 @@ class Pill
   end
 end
 
-class GitPill < Pill
+class OptionalPill < Pill
   include Util
 
   def initialize(active, config, text = '')

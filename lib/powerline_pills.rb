@@ -80,8 +80,8 @@ foreground_git_dirty = fg_color(config['git_dirty']['color'])
 git = Git.new
 
 # PILLS
-insert_mode_pill = GitPill.new(mode != 'vicmd', config['insert_mode'])
-normal_mode_pill = GitPill.new(mode == 'vicmd', config['normal_mode'])
+insert_mode_pill = OptionalPill.new(mode != 'vicmd', config['insert_mode'])
+normal_mode_pill = OptionalPill.new(mode == 'vicmd', config['normal_mode'])
 
 os_pill = Pill.new(background_os, foreground_os, icon_os)
 
@@ -91,10 +91,10 @@ user_pill = Pill.new(background_user, foreground_icon_user, icon_user,
 folder_pill = Pill.new(background_folder, foreground_icon_folder, icon_folder,
                        foreground_folder, dir)
 
-git_branch_pill = GitPill.new(git.active?, config['git_branch'], git.branch)
-git_dirty_pill = GitPill.new(git.dirty?, config['git_dirty'], git.dirty)
-git_staged_pill = GitPill.new(git.staged?, config['git_staged'], git.staged)
-git_untracked_pill = GitPill.new(git.untracked?, config['git_untracked'], git.untracked)
+git_branch_pill = OptionalPill.new(git.active?, config['git_branch'], git.branch)
+git_dirty_pill = OptionalPill.new(git.dirty?, config['git_dirty'], git.dirty)
+git_staged_pill = OptionalPill.new(git.staged?, config['git_staged'], git.staged)
+git_untracked_pill = OptionalPill.new(git.untracked?, config['git_untracked'], git.untracked)
 
 date_pill = Pill.new(background_date, foreground_icon_date, icon_date,
                      foreground_date, cur_date)
