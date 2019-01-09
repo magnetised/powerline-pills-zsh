@@ -1,7 +1,6 @@
 require_relative 'segment'
 require_relative 'util'
 
-# Class that holds information about a pill
 class Pill
   attr_accessor :background, :foreground, :foreground_icon,
                 :icon, :foreground_text, :text
@@ -17,95 +16,54 @@ class Pill
   end
 
   def segment
-    Segment.new(@background, ' ' + @foreground_icon + @icon + ' ' + @foreground_text + @text + ' ')
+    bg = ' ' + @foreground_icon + @icon + ' '
+    if text.empty?
+      Segment.new(@background, bg)
+    else
+      Segment.new(@background, bg << @foreground_text + @text.to_s + ' ')
+    end
   end
 end
 
-class GitPill
+class GitPill < Pill
   include Util
 
-  def initialize(config)
+  def initialize(active, config, text = '')
+    @active = active
     @config = config
+    @text = text.to_s
   end
 
   def segment
-    if git_dir?
+    if @active
       Segment.new(background_color, text)
     else
-      BlankSegment.new
+      nil
     end
-  end
-
-  def background_color
-    color =
-      if git_modified?
-        if git_all_staged?
-          @config['background_color_staged']
-        else
-          @config['background_color_dirty']
-        end
-      else
-        @config['background_color_clean']
-      end
-    bg_color(color)
   end
 
   def text
-    foreground_icon = fg_color(@config['icon']['color'])
-    [
-      '',
-      foreground_icon + @config['icon']['char'],
-      git_branch_name,
-      git_dirty_text,
-      git_untracked_text,
-      git_staged_text,
-      '',
-    ].compact.join(' ')
-  end
-
-  def git_dir?
-    system('git rev-parse --short HEAD >/dev/null 2>&1')
-  end
-
-  def git_branch_name
-    `git branch | grep \\* | cut -d ' ' -f2`.delete("\n")
-  end
-
-  def git_modified?
-    !`git status --porcelain -uno`.empty?
-  end
-
-  def git_dirty?
-    git_modified? && !git_all_staged?
-  end
-
-  def git_all_staged?
-    system('git diff --no-ext-diff --quiet --exit-code 2>/dev/null')
-  end
-
-  def git_dirty_text
-    if git_dirty?
-      fg_color(@config['icon']['dirty']['color']) << @config['icon']['dirty']['char']
+    icon_text = ' ' + icon_color + icon_char + ' '
+    if @text.empty?
+      icon_text
     else
-      nil
+      icon_text + color + @text.to_s + ' '
     end
   end
 
-  def git_untracked_text
-    untracked = `git ls-files --other --exclude-standard --directory --no-empty-directory 2>/dev/null`.chomp
-    if untracked.empty?
-      nil
-    else
-      fg_color(@config['icon']['untracked']['color']) << @config['icon']['untracked']['char']
-    end
+  def color
+    fg_color(@config['color'])
   end
 
-  def git_staged_text
-    staged = !system('git diff --cached --no-ext-diff --quiet --exit-code 2>/dev/null')
-    if staged
-      fg_color(@config['icon']['staged']['color']) << @config['icon']['staged']['char']
-    else
-      nil
-    end
+  def icon_char
+    @config['icon']['char']
+  end
+
+  def icon_color
+    fg_color(@config['icon']['color'])
+  end
+
+  def background_color
+    bg_color(@config['background_color'])
   end
 end

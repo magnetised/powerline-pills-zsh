@@ -5,6 +5,7 @@ require 'yaml'
 require_relative 'util'
 require_relative 'pill'
 require_relative 'segment'
+require_relative 'git'
 include Util
 
 # VARS
@@ -44,6 +45,7 @@ icon_darwin = config['os']['icon_darwin']
 icon_os = linux? ? icon_linux : icon_darwin
 icon_user = config['user']['icon']['char']
 icon_folder = config['folder']['icon']['char']
+icon_git_dirty = config['git_dirty']['icon']['char']
 icon_date = config['date']['icon']['char']
 icon_bash = config['cmd']['icon']['char']
 
@@ -70,6 +72,12 @@ foreground_cmd_success = fg_color(config['cmd']['color_success'])
 background_reset = '%f%k'
 color = fg_color(config['base']['color'])
 
+background_git_dirty = bg_color(config['git_dirty']['background_color'])
+foreground_icon_git_dirty = fg_color(config['git_dirty']['icon']['color'])
+foreground_git_dirty = fg_color(config['git_dirty']['color'])
+
+git = Git.new
+
 # PILLS
 os_pill = Pill.new(background_os, foreground_os, icon_os)
 
@@ -79,7 +87,10 @@ user_pill = Pill.new(background_user, foreground_icon_user, icon_user,
 folder_pill = Pill.new(background_folder, foreground_icon_folder, icon_folder,
                        foreground_folder, dir)
 
-git_pill = GitPill.new(config['git_new'])
+git_branch_pill = GitPill.new(git.active?, config['git_branch'], git.branch)
+git_dirty_pill = GitPill.new(git.dirty?, config['git_dirty'], git.dirty)
+git_staged_pill = GitPill.new(git.staged?, config['git_staged'], git.staged)
+git_untracked_pill = GitPill.new(git.untracked?, config['git_untracked'], git.untracked)
 
 date_pill = Pill.new(background_date, foreground_icon_date, icon_date,
                      foreground_date, cur_date)
@@ -88,8 +99,17 @@ background_cmd = last_exit ? background_cmd_success : background_cmd_failed
 foreground_cmd = last_exit ? foreground_cmd_success : foreground_cmd_failed
 cmd_pill = Pill.new(background_cmd, foreground_cmd, icon_bash)
 
-pill_names = { os: os_pill, user: user_pill, folder: folder_pill,
-               git: git_pill, date: date_pill, cmd: cmd_pill }
+pill_names = {
+  os: os_pill,
+  user: user_pill,
+  folder: folder_pill,
+  git_branch: git_branch_pill,
+  git_dirty: git_dirty_pill,
+  git_staged: git_staged_pill,
+  git_untracked: git_untracked_pill,
+  date: date_pill,
+  cmd: cmd_pill
+}
 
 left_top = []
 right_top = []
@@ -108,7 +128,7 @@ config_left_bottom.each do |clb|
 end
 
 def render_segments(pills, icon_left, icon_right)
-  segments = pills.map(&:segment)
+  segments = pills.map(&:segment).compact
   ([BlankSegment.new] + segments).zip(segments + [BlankSegment.new]).map do |prev, current|
     current.join(prev, icon_left, icon_right)
   end.join('')
