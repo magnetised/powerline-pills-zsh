@@ -9,7 +9,8 @@ require_relative 'git'
 include Util
 
 # VARS
-last_exit = ARGV[0] == '0'
+mode = ARGV[0]
+last_exit = ARGV[1] == '0'
 username = ENV['USER']
 dir = Dir.pwd
 size = `tput cols`.to_i
@@ -79,6 +80,9 @@ foreground_git_dirty = fg_color(config['git_dirty']['color'])
 git = Git.new
 
 # PILLS
+insert_mode_pill = GitPill.new(mode != 'vicmd', config['insert_mode'])
+normal_mode_pill = GitPill.new(mode == 'vicmd', config['normal_mode'])
+
 os_pill = Pill.new(background_os, foreground_os, icon_os)
 
 user_pill = Pill.new(background_user, foreground_icon_user, icon_user,
@@ -100,6 +104,8 @@ foreground_cmd = last_exit ? foreground_cmd_success : foreground_cmd_failed
 cmd_pill = Pill.new(background_cmd, foreground_cmd, icon_bash)
 
 pill_names = {
+  insert_mode: insert_mode_pill,
+  normal_mode: normal_mode_pill,
   os: os_pill,
   user: user_pill,
   folder: folder_pill,
