@@ -7,7 +7,11 @@ class Git
     @dirty = 0
     @staged = 0
     @untracked = 0
-    parse(`git status --porcelain`) if @active
+    @ref_name = ''
+    if @active
+      parse(`git status --porcelain`)
+      @ref_type, @ref_name = parse_branch
+    end
   end
 
   def active?
@@ -34,9 +38,40 @@ class Git
     @active && @dirty == 0 && @staged == 0
   end
 
-  def branch
-    return '' unless active?
-    @branch ||= `git branch | grep \\* | cut -d ' ' -f2`.delete("\n")
+  def branch?
+    @active && @ref_type == :branch
+  end
+
+  def tag?
+    @active && @ref_type == :tag
+  end
+
+  def detached?
+    @active && @ref_type == :detached
+  end
+
+  def ref_name
+    @ref_name
+  end
+
+  def parse_branch
+    success, ref = runcmd('git symbolic-ref HEAD 2>/dev/null')
+    if success
+      return [:branch, ref.sub(/^refs\/heads\//, '')]
+    end
+
+    success, ref = runcmd('git describe --tags --exact-match 2>/dev/null')
+    if success
+      return [:tag, ref]
+    end
+
+    _success, ref = runcmd('git show-ref --head -s --abbrev | head -n1 2>/dev/null')
+    return [:detached, ref]
+  end
+
+  def runcmd(cmd)
+    result = %x[#{cmd}].chomp
+    [$?.success?, result]
   end
 
   def parse(status)

@@ -91,7 +91,9 @@ user_pill = Pill.new(background_user, foreground_icon_user, icon_user,
 folder_pill = Pill.new(background_folder, foreground_icon_folder, icon_folder,
                        foreground_folder, dir)
 
-git_branch_pill = OptionalPill.new(git.active?, config['git_branch'], git.branch)
+git_branch_pill = OptionalPill.new(git.branch?, config['git_branch'], git.ref_name)
+git_tag_pill = OptionalPill.new(git.tag?, config['git_tag'], git.ref_name)
+git_detached_pill = OptionalPill.new(git.detached?, config['git_detached'], git.ref_name)
 git_dirty_pill = OptionalPill.new(git.dirty?, config['git_dirty'], git.dirty)
 git_staged_pill = OptionalPill.new(git.staged?, config['git_staged'], git.staged)
 git_untracked_pill = OptionalPill.new(git.untracked?, config['git_untracked'], git.untracked)
@@ -110,6 +112,8 @@ pill_names = {
   user: user_pill,
   folder: folder_pill,
   git_branch: git_branch_pill,
+  git_tag: git_tag_pill,
+  git_detached: git_detached_pill,
   git_dirty: git_dirty_pill,
   git_staged: git_staged_pill,
   git_untracked: git_untracked_pill,

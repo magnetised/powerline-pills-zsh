@@ -71,6 +71,20 @@ git_branch:
     char: ''
     color: 22
 
+git_tag:
+  background_color: 112
+  color: 22
+  icon:
+    char: ''
+    color: 22
+
+git_detached:
+  background_color: 112
+  color: 22
+  icon:
+    char: ''
+    color: 22
+
 git_dirty:
   background_color: 124
   color: 219
