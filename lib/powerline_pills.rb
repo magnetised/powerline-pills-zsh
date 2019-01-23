@@ -12,7 +12,6 @@ include Util
 mode = ARGV[0]
 last_exit = ARGV[1] == '0'
 username = ENV['USER']
-dir = Dir.pwd
 size = `tput cols`.to_i
 
 xdg_config_home = ENV["XDG_CONFIG_HOME"] || File.join(ENV["HOME"], ".config")
@@ -78,6 +77,7 @@ foreground_icon_git_dirty = fg_color(config['git_dirty']['icon']['color'])
 foreground_git_dirty = fg_color(config['git_dirty']['color'])
 
 git = Git.new
+dir = shorten_path(Dir.pwd, git.git_dir)
 
 # PILLS
 insert_mode_pill = OptionalPill.new(mode != 'vicmd', config['insert_mode'])

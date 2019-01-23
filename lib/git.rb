@@ -22,6 +22,11 @@ class Git
     system('git rev-parse --short HEAD >/dev/null 2>&1')
   end
 
+  def git_dir
+    return nil unless @active
+    @git_dir ||= `git rev-parse --show-toplevel`.chomp
+  end
+
   def dirty?
     @active && @dirty > 0
   end
