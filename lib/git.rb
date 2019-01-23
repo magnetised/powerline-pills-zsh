@@ -55,8 +55,13 @@ class Git
     @active && @ref_type == :detached
   end
 
-  def ref_name
-    @ref_name
+  def ref_name(length = -1)
+    name = @ref_name[0..length]
+    if name.length < @ref_name.length
+      "#{name}…"
+    else
+      name
+    end
   end
 
   def parse_branch
